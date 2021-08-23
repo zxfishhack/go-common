@@ -3,7 +3,6 @@ package jwt
 import (
 	"crypto/rsa"
 	"github.com/zxfishhack/go-common/token"
-	"reflect"
 	"strings"
 	"time"
 
@@ -49,40 +48,7 @@ func (s *Service) Marshal(v interface{}) (string, error) {
 }
 
 func (s *Service) Unmarshal(data string, v interface{}) (err error) {
-	tk, err := jwt.ParseWithClaims(data, &tokenClaim{UserData: v}, s.keyFunc)
-	if err != nil {
-		return
-	}
-	val := reflect.ValueOf(v)
-	if val.Kind() == reflect.Ptr && !val.IsNil() {
-		val = val.Elem()
-	}
-	if claim, ok := tk.Claims.(*tokenClaim); ok {
-		dVal := reflect.ValueOf(claim.UserData)
-		if dVal.Kind() == reflect.Ptr && !dVal.IsNil() {
-			dVal = dVal.Elem()
-		}
-		switch val.Kind() {
-		case reflect.Slice:
-			if (dVal.Type().Kind() == reflect.Slice || dVal.Type().Kind() == reflect.Array) && !val.IsNil() {
-				if dVal.Type().Elem().AssignableTo(val.Type().Elem()) {
-					val = reflect.AppendSlice(val, dVal)
-				}
-			}
-		case reflect.Array:
-			if (dVal.Type().Kind() == reflect.Slice || dVal.Type().Kind() == reflect.Array) && dVal.Len() >= val.Len() {
-				if dVal.Type().Elem().AssignableTo(val.Type().Elem()) {
-					for i := 0; i < val.Len(); i++ {
-						val.Index(i).Set(dVal.Index(i))
-					}
-				}
-			}
-		default:
-			if val.CanSet() && val.Type().AssignableTo(dVal.Type()) {
-				val.Set(dVal)
-			}
-		}
-	}
+	_, err = jwt.ParseWithClaims(data, &tokenClaim{UserData: v}, s.keyFunc)
 	return
 }
 

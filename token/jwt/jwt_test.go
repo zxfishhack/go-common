@@ -1,7 +1,11 @@
 package jwt
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/zxfishhack/go-common/token"
 	"log"
@@ -15,7 +19,16 @@ var ts token.ITokenService
 
 func TestMain(m *testing.M) {
 	var err error
-	ts, err = NewTokenService([]byte(privateKey))
+	pk, err := rsa.GenerateKey(rand.Reader, 1024)
+	if err != nil {
+		log.Fatal(err)
+	}
+	pemData := pem.EncodeToMemory(
+		&pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: x509.MarshalPKCS1PrivateKey(pk),
+		})
+	ts, err = NewTokenService(pemData)
 	if err != nil {
 		log.Fatal(err)
 	}
