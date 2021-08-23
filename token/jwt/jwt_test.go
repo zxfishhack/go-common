@@ -3,13 +3,28 @@ package jwt
 import (
 	"encoding/json"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/zxfishhack/go-common/token"
+	"log"
+	"os"
 	"testing"
 
 	"gotest.tools/v3/assert"
 )
 
+var ts token.ITokenService
+
+func TestMain(m *testing.M) {
+	var err error
+	ts, err = NewTokenService([]byte(privateKey))
+	if err != nil {
+		log.Fatal(err)
+	}
+	code := m.Run()
+	os.Exit(code)
+}
+
 func TestJwt_String(t *testing.T) {
-	ts := NewTokenService()
+
 	s := "123"
 	res, err := ts.Marshal(s)
 	assert.NilError(t, err)
@@ -22,7 +37,7 @@ func TestJwt_String(t *testing.T) {
 }
 
 func TestJwt_StringFailed(t *testing.T) {
-	ts := NewTokenService()
+
 	s := "123"
 	res, err := ts.Marshal(s)
 	assert.NilError(t, err)
@@ -38,7 +53,7 @@ func TestJwt_StringFailed(t *testing.T) {
 }
 
 func TestJwt_Array(t *testing.T) {
-	ts := NewTokenService()
+
 	s := [2]string{"123", "234"}
 	res, err := ts.Marshal(s)
 	assert.NilError(t, err)
@@ -51,7 +66,7 @@ func TestJwt_Array(t *testing.T) {
 }
 
 func TestJwt_Map(t *testing.T) {
-	ts := NewTokenService()
+
 	s := map[string]string{"123": "234"}
 	res, err := ts.Marshal(s)
 	assert.NilError(t, err)
@@ -74,7 +89,7 @@ type data struct {
 }
 
 func TestJwt_Struct(t *testing.T) {
-	ts := NewTokenService()
+
 	s := data{
 		Key: "123",
 		Val: "234",

@@ -2,11 +2,7 @@ package jwt
 
 import (
 	"crypto/rsa"
-	"errors"
 	"github.com/zxfishhack/go-common/token"
-	"io/ioutil"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -25,36 +21,16 @@ type Service struct {
 	pub  *rsa.PublicKey
 }
 
-var singleton *Service
-
-var (
-	ErrorType = errors.New("type not match type in jwt")
-)
-
-func init() {
-	var err error
-	keyFile := os.Getenv("JWT_KEY_FILE")
-	var b []byte
-	if keyFile == "" {
-		log.Print("JWT_KEY_FILE not set, use bundle key")
-	} else if _, err = os.Stat(keyFile); err != nil && os.IsNotExist(err) {
-		log.Print("WARN: JWT_KEY_FILE is set, but file does not exist, use bundle key")
-	} else if b, err = ioutil.ReadFile(keyFile); err != nil {
-		log.Printf("WARN: JWT_KEY_FILE is set, but file read failed %v, use bundle key", err)
-	}
-	if len(b) == 0 || err != nil {
-		b = []byte(privateKey)
-	}
-	singleton = &Service{}
-	singleton.priv, err = jwt.ParseRSAPrivateKeyFromPEM(b)
+func NewTokenService(keyPem []byte) (s token.ITokenService, err error) {
+	res := &Service{}
+	res.priv, err = jwt.ParseRSAPrivateKeyFromPEM(keyPem)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
-	singleton.pub = &singleton.priv.PublicKey
-}
+	res.pub = &res.priv.PublicKey
+	s = res
 
-func NewTokenService() token.ITokenService {
-	return singleton
+	return
 }
 
 func (s *Service) keyFunc(*jwt.Token) (interface{}, error) {
