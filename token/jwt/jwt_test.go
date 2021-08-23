@@ -1,6 +1,8 @@
 package jwt
 
 import (
+	"encoding/json"
+	"github.com/golang-jwt/jwt/v4"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -16,6 +18,22 @@ func TestJwt_String(t *testing.T) {
 	err = ts.Unmarshal(res, &s2)
 	assert.NilError(t, err)
 	assert.Equal(t, s, s2)
+	assert.NilError(t, ts.Validate(res))
+}
+
+func TestJwt_StringFailed(t *testing.T) {
+	ts := NewTokenService()
+	s := "123"
+	res, err := ts.Marshal(s)
+	assert.NilError(t, err)
+	t.Log(res)
+	s2 := make([]string, 0)
+	err = ts.Unmarshal(res, &s2)
+	assert.Check(t, err != nil)
+	newErr, ok := err.(*jwt.ValidationError)
+	assert.Check(t, ok)
+	_, ok = newErr.Inner.(*json.UnmarshalTypeError)
+	assert.Check(t, ok)
 	assert.NilError(t, ts.Validate(res))
 }
 

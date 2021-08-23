@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"crypto/rsa"
+	"errors"
 	"github.com/zxfishhack/go-common/token"
 	"io/ioutil"
 	"log"
@@ -25,6 +26,10 @@ type Service struct {
 }
 
 var singleton *Service
+
+var (
+	ErrorType = errors.New("type not match type in jwt")
+)
 
 func init() {
 	var err error
@@ -100,7 +105,6 @@ func (s *Service) Unmarshal(data string, v interface{}) (err error) {
 			if val.CanSet() && val.Type().AssignableTo(dVal.Type()) {
 				val.Set(dVal)
 			}
-
 		}
 	}
 	return
